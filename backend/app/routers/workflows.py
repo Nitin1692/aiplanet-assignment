@@ -32,6 +32,31 @@ def list_workflows():
     ]
     return {"workflows": workflows}
 
+@router.get("/{workflow_id}")
+def get_workflow(workflow_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "SELECT id, name, nodes, edges, created_at FROM workflows WHERE id = %s;",
+            (workflow_id,)
+        )
+        row = cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+
+        workflow = {
+            "id": row.get("id"),
+            "name": row.get("name"),
+            "nodes": row.get("nodes"),
+            "edges": row.get("edges"),
+            "created_at": row.get("created_at")
+        }
+        return workflow
+    finally:
+        cur.close()
+        conn.close()
+
 
 
 @router.put("/{workflow_id}")

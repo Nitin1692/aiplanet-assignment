@@ -1,6 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.db import get_connection
+from app.services.llm import chat_completion
+from app.services.kb import run_kb_search
+from app.routers.workflows import get_workflow
 
 router = APIRouter()
 
@@ -9,6 +12,9 @@ class ChatMessageCreate(BaseModel):
     role: str
     content: str
 
+class QueryRequest(BaseModel):
+    workflow_id: int
+    query: str
 
 @router.post("/session/{workflow_id}")
 def create_session(workflow_id: int):
@@ -97,3 +103,29 @@ def delete_message(message_id: int):
     finally:
         cur.close()
         conn.close()
+
+@router.post("/query")
+def chat_query(req: QueryRequest):
+    workflow = get_workflow(req.workflow_id)
+    if not workflow:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+
+    nodes = workflow["nodes"]
+    edges = workflow["edges"]
+
+    # Step 1: Check for Knowledge Base node
+    context = None
+    for node in nodes:
+        if node["data"]["label"] == "Knowledge Base":
+            context = run_kb_search(req.query)  # fetch relevant docs/snippets
+            break
+
+    # Step 2: Call LLM
+    answer = chat_completion(
+        query=req.query,
+        context=context,
+        provider=None,  # use default provider
+        history=None,   # could fetch prior messages if needed
+    )
+
+    return {"answer": answer}
