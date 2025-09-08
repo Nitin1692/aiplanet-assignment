@@ -19,9 +19,9 @@ def create_session(workflow_id: int):
             "INSERT INTO chat_sessions (workflow_id) VALUES (%s) RETURNING id;",
             (workflow_id,)
         )
-        session_id = cur.fetchone()[0]
+        session_id = cur.fetchone()
         conn.commit()
-        return {"session_id": session_id}
+        return {"session_id": session_id.get("id")}
     finally:
         cur.close()
         conn.close()
@@ -53,7 +53,7 @@ def add_message(msg: ChatMessageCreate):
                VALUES (%s, %s, %s) RETURNING id;""",
             (msg.session_id, msg.role, msg.content)
         )
-        message_id = cur.fetchone()[0]
+        message_id = cur.fetchone()
         conn.commit()
         return {"id": message_id, "message": "Message added successfully"}
     finally:

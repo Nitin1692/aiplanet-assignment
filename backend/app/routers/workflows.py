@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.models import create_workflow, get_workflows, get_connection
+from typing import List, Dict, Any
 
 router = APIRouter()
 
 class WorkflowCreate(BaseModel):
     name: str
-    nodes: dict
-    edges: dict
+    nodes: List[Dict[str, Any]]
+    edges: List[Dict[str, Any]]
 
 
 @router.post("/")
@@ -21,15 +22,16 @@ def list_workflows():
     rows = get_workflows()
     workflows = [
         {
-            "id": row[0],
-            "name": row[1],
-            "nodes": row[2],
-            "edges": row[3],
-            "created_at": row[4]
+            "id": row["id"],
+            "name": row["name"],
+            "nodes": row["nodes"],  # Already JSON
+            "edges": row["edges"],  # Already JSON
+            "created_at": row["created_at"]
         }
         for row in rows
     ]
     return {"workflows": workflows}
+
 
 
 @router.put("/{workflow_id}")

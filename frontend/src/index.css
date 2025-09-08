@@ -1,3 +1,6 @@
+/* -----------------------------
+   Global Styles & Font Setup
+------------------------------ */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -13,28 +16,50 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* -----------------------------
+   Full-page Layout
+------------------------------ */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: row;       /* Sidebar + canvas layout */
+  align-items: stretch;      /* Canvas stretches full height */
+  justify-content: flex-start;
+  min-width: 320px;
+  box-sizing: border-box;
+  background-color: #242424;
+}
+
+/* -----------------------------
+   Links
+------------------------------ */
 a {
   font-weight: 500;
   color: #646cff;
-  text-decoration: inherit;
+  text-decoration: none;
 }
 a:hover {
   color: #535bf2;
 }
 
-body {
+/* -----------------------------
+   Headings
+------------------------------ */
+h1, h2, h3, h4, h5, h6 {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
+/* -----------------------------
+   Buttons
+------------------------------ */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -43,6 +68,7 @@ button {
   font-weight: 500;
   font-family: inherit;
   background-color: #1a1a1a;
+  color: inherit;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -54,6 +80,9 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* -----------------------------
+   Media Queries
+------------------------------ */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

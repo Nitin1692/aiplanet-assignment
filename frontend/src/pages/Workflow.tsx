@@ -5,6 +5,8 @@ interface Workflow {
   id: number;
   name: string;
   created_at: string;
+  nodes?: any[]; // optional, if you want to pass to ReactFlow
+  edges?: any[];
 }
 
 export default function Workflows() {
@@ -14,7 +16,8 @@ export default function Workflows() {
     const fetchWorkflows = async () => {
       try {
         const res = await api.get("/workflows/");
-        setWorkflows(res.data);
+        // Backend returns { workflows: [...] }
+        setWorkflows(res.data.workflows);
       } catch (err) {
         console.error(err);
       }
@@ -25,13 +28,17 @@ export default function Workflows() {
   return (
     <div style={{ padding: "1rem" }}>
       <h2>Saved Workflows</h2>
-      <ul>
-        {workflows.map((wf) => (
-          <li key={wf.id}>
-            {wf.name} ({new Date(wf.created_at).toLocaleString()})
-          </li>
-        ))}
-      </ul>
+      {workflows.length === 0 ? (
+        <p>No workflows found.</p>
+      ) : (
+        <ul>
+          {workflows.map((wf) => (
+            <li key={wf.id}>
+              {wf.name} ({new Date(wf.created_at).toLocaleString()})
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

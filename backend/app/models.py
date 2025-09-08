@@ -1,5 +1,6 @@
 from datetime import datetime
 from app.db import get_connection
+import json
 
 # ---------- TABLE CREATION ----------
 
@@ -54,16 +55,23 @@ def init_tables():
 
 # ---------- WORKFLOWS ----------
 
-def create_workflow(name: str, nodes: dict, edges: dict):
+def create_workflow(name: str, nodes: list, edges: list):
     conn = get_connection()
     cur = conn.cursor()
     try:
         cur.execute(
-            """INSERT INTO workflows (name, nodes, edges)
-               VALUES (%s, %s, %s) RETURNING id;""",
-            (name, nodes, edges)
+            """
+            INSERT INTO workflows (name, nodes, edges)
+            VALUES (%s, %s, %s)
+            RETURNING id;
+            """,
+            (
+                name,
+                json.dumps(nodes),  # <-- serialize to JSON string
+                json.dumps(edges),  # <-- serialize to JSON string
+            )
         )
-        workflow_id = cur.fetchone()[0]
+        workflow_id = cur.fetchone()
         conn.commit()
         return workflow_id
     finally:
@@ -89,13 +97,21 @@ def create_document(filename: str, collection: str, text_chars: int):
     cur = conn.cursor()
     try:
         cur.execute(
-            """INSERT INTO documents (filename, collection, text_chars)
-               VALUES (%s, %s, %s) RETURNING id;""",
+            """
+            INSERT INTO documents (filename, collection, text_chars, created_at)
+            VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
+            RETURNING id;
+            """,
             (filename, collection, text_chars)
         )
-        doc_id = cur.fetchone()[0]
+        row = cur.fetchone()
+        if not row:
+            raise Exception("Failed to insert document, no ID returned")
+        doc_id = row
+        print(doc_id)
         conn.commit()
         return doc_id
     finally:
         cur.close()
         conn.close()
+
